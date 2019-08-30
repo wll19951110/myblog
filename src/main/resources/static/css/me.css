@@ -113,6 +113,15 @@ body {
 
 
 /*-----container*/
+.m-container-large{
+    max-width: 110em !important;
+    margin: auto !important;
+}
+
+.m-container-tini{
+    max-width: 100em !important;
+    margin: auto !important;
+}
 
 .m-container {
     max-width: 72em !important;
