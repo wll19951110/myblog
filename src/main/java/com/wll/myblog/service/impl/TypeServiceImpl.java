@@ -32,7 +32,7 @@ public class TypeServiceImpl implements TypeService {
 
     @Override
     public Type getTypeByName(String name) {
-        return null;
+        return typeRepository.findByName(name);
     }
 
     @Override
