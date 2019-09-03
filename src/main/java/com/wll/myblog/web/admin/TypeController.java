@@ -39,7 +39,11 @@ public class TypeController {
         return "admin/types";
     }
 
-
+    /**
+     * 分类新增页
+     * @param model
+     * @return
+     */
     @GetMapping("/types/input")
     public String input(Model model){
         model.addAttribute("type",new Type());
