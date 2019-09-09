@@ -42,7 +42,7 @@ public class TypeServiceImpl implements TypeService {
 
     @Override
     public List<Type> listType() {
-        return null;
+        return typeRepository.findAll();
     }
 
     @Override

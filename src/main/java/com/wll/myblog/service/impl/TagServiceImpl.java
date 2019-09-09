@@ -1,14 +1,17 @@
 package com.wll.myblog.service.impl;
 
 import com.wll.myblog.dao.TagRepository;
+import com.wll.myblog.exception.NotFoundException;
 import com.wll.myblog.po.Tag;
 import com.wll.myblog.service.TagService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,7 +33,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Tag findTagByName(String name) {
-        return null;
+        return tagRepository.findByName(name);
     }
 
     @Override
@@ -40,7 +43,20 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<Tag> listTag() {
-        return null;
+        return tagRepository.findAll();
+    }
+
+    @Override
+    public List<Tag> listTag(String ids) {
+        List<Long> list = new ArrayList<>();
+        if (!"".equals(ids)){
+            String[] idArray = ids.split(",");
+            for (int i = 0;i<idArray.length;i++) {
+                list.add(new Long(idArray[i]));
+            }
+        }
+
+        return tagRepository.findAllById(list);
     }
 
     @Override
@@ -50,7 +66,16 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Tag updateTag(Long id, Tag tag) {
-        return null;
+
+        Tag t = tagRepository.getOne(id);
+
+        if (t==null){
+            throw new NotFoundException("该标签找不到");
+        }else {
+            BeanUtils.copyProperties(tag,t);
+            return tagRepository.save(t);
+        }
+
     }
 
     @Override
