@@ -5,11 +5,14 @@ import com.wll.myblog.exception.NotFoundException;
 import com.wll.myblog.po.Blog;
 import com.wll.myblog.po.Type;
 import com.wll.myblog.service.BlogService;
+import com.wll.myblog.util.MyBeanUtils;
 import com.wll.myblog.vo.BlogQuery;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -39,27 +42,32 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
+    public Page<Blog> listBlog(Pageable pageable) {
+        return blogRepository.findAll(pageable);
+    }
+
+    @Override
     public Page<Blog> listBlog(Pageable pageable, BlogQuery blog) {
         return blogRepository.findAll(new Specification<Blog>() {
             @Override
             public Predicate toPredicate(Root<Blog> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder criteriaBuilder) {
                 List<Predicate> predicates = new ArrayList<>();
 
-                if (!"".equals(blog.getTitle()) && blog.getTitle()!=null){
-                    predicates.add(criteriaBuilder.like(root.get("title"),"%"+blog.getTitle()+"%"));
+                if (!"".equals(blog.getTitle()) && blog.getTitle() != null) {
+                    predicates.add(criteriaBuilder.like(root.get("title"), "%" + blog.getTitle() + "%"));
                 }
 
-                if (blog.getTypeId()!=null && !"".equals(blog.getTypeId())){
-                    predicates.add(criteriaBuilder.equal(root.<Type>get("type").get("id"),blog.getTypeId()));
+                if (blog.getTypeId() != null && !"".equals(blog.getTypeId())) {
+                    predicates.add(criteriaBuilder.equal(root.<Type>get("type").get("id"), blog.getTypeId()));
                 }
 
-                if (blog.isRecommend()){
-                    predicates.add(criteriaBuilder.equal(root.<Boolean>get("recommend"),blog.isRecommend()));
+                if (blog.isRecommend()) {
+                    predicates.add(criteriaBuilder.equal(root.<Boolean>get("recommend"), blog.isRecommend()));
                 }
                 criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
                 return null;
             }
-        },pageable);
+        }, pageable);
     }
 
     @Override
@@ -69,12 +77,14 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public Page<Blog> listBlog(String query, Pageable pageable) {
-        return null;
+        return blogRepository.listBlog(query,pageable);
     }
 
     @Override
     public List<Blog> listRecommendBlogTop(Integer size) {
-        return null;
+        Sort sort = new Sort(Sort.Direction.DESC, "updateTime");
+        Pageable pageable = PageRequest.of(0, size, sort);
+        return blogRepository.listRecommendBlogTop(pageable);
     }
 
     @Override
@@ -89,9 +99,11 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public Blog saveBlog(Blog blog) {
+
         blog.setCreateTime(new Date());
         blog.setUpdateTime(new Date());
         blog.setViews(0);
+
         return blogRepository.save(blog);
     }
 
@@ -100,10 +112,11 @@ public class BlogServiceImpl implements BlogService {
 
         Blog one = blogRepository.getOne(id);
 
-        if (one==null){
+        if (one == null) {
             throw new NotFoundException("该博客找不到");
-        }else {
-            BeanUtils.copyProperties(blog,one);
+        } else {
+            BeanUtils.copyProperties(blog, one, MyBeanUtils.getNullPropertyNames(blog));
+            blog.setUpdateTime(new Date());
             return blogRepository.save(one);
         }
 
