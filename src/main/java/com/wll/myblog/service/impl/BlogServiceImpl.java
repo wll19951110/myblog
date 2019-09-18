@@ -5,6 +5,7 @@ import com.wll.myblog.exception.NotFoundException;
 import com.wll.myblog.po.Blog;
 import com.wll.myblog.po.Type;
 import com.wll.myblog.service.BlogService;
+import com.wll.myblog.util.MarkdownUtils;
 import com.wll.myblog.util.MyBeanUtils;
 import com.wll.myblog.vo.BlogQuery;
 import org.springframework.beans.BeanUtils;
@@ -38,7 +39,14 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public Blog getAndConvert(Long id) {
-        return null;
+        Blog blog = blogRepository.getOne(id);
+        if (blog==null){
+            throw new NotFoundException("该博客不存在");
+        }
+        Blog b = new Blog();
+        BeanUtils.copyProperties(blog,b);
+        b.setContent(MarkdownUtils.markdownToHtmlExtensions(b.getContent()));
+        return b;
     }
 
     @Override

@@ -10,6 +10,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 
@@ -49,4 +50,18 @@ public class IndexController {
         model.addAttribute("query",query);
         return "search";
     }
+
+    /**
+     * 获取博客详情
+     * @param id
+     * @param model
+     * @return
+     */
+    @GetMapping("/blog/{id}")
+    public String blog(@PathVariable Long id, Model model){
+        model.addAttribute("blog",blogService.getAndConvert(id));
+        return "blog";
+    }
+
+
 }
